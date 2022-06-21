@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gogf/gf/v2/crypto/gaes"
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/encoding/gbase64"
@@ -13,8 +16,6 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gogf/gf/v2/util/grand"
-	"net/http"
-	"strings"
 )
 
 // GfToken gtoken结构体
@@ -411,17 +412,11 @@ func (m *GfToken) InitConfig() bool {
 	if m.LoginAfterFunc == nil {
 		m.LoginAfterFunc = func(r *ghttp.Request, respData Resp) {
 			if !respData.Success() {
-				err := r.Response.WriteJson(respData)
-				if err != nil {
-					g.Log().Error(r.Context(), err)
-				}
+				r.Response.WriteJson(respData)
 			} else {
-				err := r.Response.WriteJson(Succ(g.Map{
+				r.Response.WriteJson(Succ(g.Map{
 					KeyToken: respData.GetString(KeyToken),
 				}))
-				if err != nil {
-					g.Log().Error(r.Context(), err)
-				}
 			}
 		}
 	}
@@ -435,15 +430,9 @@ func (m *GfToken) InitConfig() bool {
 	if m.LogoutAfterFunc == nil {
 		m.LogoutAfterFunc = func(r *ghttp.Request, respData Resp) {
 			if respData.Success() {
-				err := r.Response.WriteJson(Succ(MsgLogoutSucc))
-				if err != nil {
-					g.Log().Error(r.Context(), err)
-				}
+				r.Response.WriteJson(Succ(MsgLogoutSucc))
 			} else {
-				err := r.Response.WriteJson(respData)
-				if err != nil {
-					g.Log().Error(r.Context(), err)
-				}
+				r.Response.WriteJson(respData)
 			}
 		}
 	}
@@ -478,10 +467,7 @@ func (m *GfToken) InitConfig() bool {
 				g.Log().Warning(r.Context(), fmt.Sprintf("[AUTH_%s][url:%s][params:%s][data:%s]",
 					no, r.URL.Path, params, respData.Json()))
 				respData.Msg = m.AuthFailMsg
-				err := r.Response.WriteJson(respData)
-				if err != nil {
-					g.Log().Error(r.Context(), err)
-				}
+				r.Response.WriteJson(respData)
 				r.ExitAll()
 			}
 		}
